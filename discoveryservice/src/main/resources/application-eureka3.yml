@@ -1,0 +1,14 @@
+spring:
+  config:
+    activate:
+      on-profile: eureka3
+
+server:
+  port: 8763
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8762/eureka/
+  instance:
+    hostname: Junseos-MacBook-Pro.local
