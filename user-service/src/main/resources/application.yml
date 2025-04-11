@@ -4,6 +4,25 @@ server:
 spring:
   application:
     name: user-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/user
+    username: postgres
+    password: 1548
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    open-in-view: false
+    show-sql: true
+    defer-datasource-initialization: true
+    database: postgresql
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyComponentPathImpl
+    properties:
+      hibernate:
+        format_sql: false
+        use_sql_comments: false
 eureka:
   client:
     register-with-eureka: true
@@ -11,4 +30,7 @@ eureka:
     service-url:
       defaultZone: http://localhost:8761/eureka
   instance:
-    instance-id: ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+
+greeting:
+  message: Welcome to the Simple E-commerce
