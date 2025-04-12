@@ -3,9 +3,9 @@ server:
 
 spring:
   application:
-    name: user-service
+    name: catalog-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/user
+    url: jdbc:postgresql://localhost:5432/catalog
     username: postgres
     password: 1548
     driver-class-name: org.postgresql.Driver
