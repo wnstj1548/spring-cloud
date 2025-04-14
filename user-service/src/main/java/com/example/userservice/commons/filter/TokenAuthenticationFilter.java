@@ -1,0 +1,109 @@
+package com.example.userservice.commons.filter;
+
+import com.example.userservice.commons.utils.TokenProvider;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+
+@RequiredArgsConstructor
+@Component
+public class TokenAuthenticationFilter extends OncePerRequestFilter {
+
+    private final TokenProvider tokenProvider;
+    public static final String TOKEN_PREFIX = "Bearer ";
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+
+        String uri = request.getRequestURI();
+
+        if(shouldSkipFilter(uri)){
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        String accessToken = resolveToken(request);
+
+        if (tokenProvider.validateToken(accessToken)) {
+            setAuthentication(accessToken);
+        }
+
+        filterChain.doFilter(request, response);
+    }
+
+    private boolean shouldSkipFilter(String uri) {
+        AntPathMatcher pathMatcher = new AntPathMatcher();
+
+        List<String> skippedUris = Arrays.asList(
+                "/favicon.ico",
+                "/error",
+                "/swagger-ui.html",
+                "/swagger-ui/**",
+                "/v3/api-docs/**",
+                "/oauth2/**",
+                "/login/oauth2/**",
+                "/auth/**",
+                "/login",
+                "/auth/**"
+        );
+
+        for (String skippedUri : skippedUris) {
+            if (pathMatcher.match(skippedUri, uri)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void setAuthentication(String accessToken) {
+        Authentication authentication = tokenProvider.getAuthentication(accessToken);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+
+    private String resolveToken(HttpServletRequest request) {
+        String token = request.getHeader(AUTHORIZATION);
+        if (ObjectUtils.isEmpty(token) || !token.startsWith(TOKEN_PREFIX)) {
+            return null;
+        }
+        return token.substring(TOKEN_PREFIX.length());
+    }
+
+    private String resolveRefreshToken(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+
+        if (cookies != null) {
+            for(Cookie cookie : cookies) {
+                if(cookie.getName().equals("refresh_token")) {
+                    return cookie.getValue();
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public void setRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
+        Cookie cookie = new Cookie("refresh_token", refreshToken);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(7 * 24 * 60 * 60);
+        response.addCookie(cookie);
+    }
+}
