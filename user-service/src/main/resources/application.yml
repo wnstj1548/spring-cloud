@@ -4,6 +4,11 @@ server:
 spring:
   application:
     name: user-service
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672
+    username: guest
+    password: guest
   datasource:
     url: jdbc:postgresql://localhost:5432/user
     username: postgres
@@ -37,7 +42,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: refresh, health, beans
+        include: refresh, health, beans, busrefresh
 
 #  jwt
 #  key: ne4hrscEOHxAweirKaQrWuCmxyWDIfCgJT1plxRRvdSvh5CBZRlj7l8fzUk7CXkJc6iLQKsg88vu64Xgh5OiF6HaiBBtk2oUnTdetestestest
