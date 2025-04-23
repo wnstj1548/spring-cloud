@@ -9,11 +9,11 @@ spring:
     port: 5672
     username: guest
     password: guest
-  datasource:
-    url: jdbc:postgresql://localhost:5432/user
-    username: postgres
-    password: 1548
-    driver-class-name: org.postgresql.Driver
+#  datasource:
+#    url: jdbc:postgresql://localhost:5432/user
+#    username: postgres
+#    password: 1548
+#    driver-class-name: org.postgresql.Driver
   jpa:
     open-in-view: false
     show-sql: true
