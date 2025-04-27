@@ -1,6 +1,8 @@
 package com.example.orderservice.application.service.impl;
 
 import com.example.orderservice.application.service.OrderService;
+import com.example.orderservice.infrastructure.dto.OrderCreatedEvent;
+import com.example.orderservice.infrastructure.producer.KafkaProducer;
 import com.example.orderservice.persistence.domain.Order;
 import com.example.orderservice.persistence.repository.JpaOrderRepository;
 import com.example.orderservice.presentation.dto.request.CreateOrderRequest;
@@ -17,10 +19,13 @@ import java.util.List;
 public class OrderServiceImpl implements OrderService {
 
     private final JpaOrderRepository orderRepository;
+    private final KafkaProducer kafkaProducer;
 
     @Override
     public Long createOrder(CreateOrderRequest request, String userId) {
-        return orderRepository.save(request.toEntity(userId)).getId();
+        Order order = orderRepository.save(request.toEntity(userId));
+        kafkaProducer.send("example-catalog-topic", OrderCreatedEvent.from(order));
+        return order.getId();
     }
 
     @Override

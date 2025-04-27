@@ -35,6 +35,10 @@ public class Catalog implements Serializable {
     @CreatedDate
     private LocalDateTime createdAt;
 
+    public void updateStock(Integer stock) {
+        this.stock = stock;
+    }
+
     @Builder
     public Catalog(Long id, String productName, Integer stock, Integer unitPrice, LocalDateTime createdAt) {
         this.id = id;
