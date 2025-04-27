@@ -44,5 +44,8 @@ management:
       exposure:
         include: refresh, health, beans, busrefresh
 
-#  jwt
+logging:
+  level:
+    com.example.userservice.infrastructure.adapter: DEBUG
+#jwt
 #  key: ne4hrscEOHxAweirKaQrWuCmxyWDIfCgJT1plxRRvdSvh5CBZRlj7l8fzUk7CXkJc6iLQKsg88vu64Xgh5OiF6HaiBBtk2oUnTdetestestest

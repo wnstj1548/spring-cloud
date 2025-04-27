@@ -1,6 +1,7 @@
 package com.example.userservice.application.service.impl;
 
 import com.example.userservice.application.service.UserService;
+import com.example.userservice.infrastructure.adapter.OrderAdapter;
 import com.example.userservice.infrastructure.adapter.OrderRestTemplate;
 import com.example.userservice.persistence.domain.User;
 import com.example.userservice.persistence.repository.JpaUserRepository;
@@ -10,15 +11,11 @@ import com.example.userservice.presentation.dto.response.ReadOrderResponse;
 import com.example.userservice.presentation.dto.response.ReadUserDetailResponse;
 import com.example.userservice.presentation.dto.response.ReadUserResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.core.env.Environment;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +28,7 @@ public class UserServiceImpl implements UserService {
     private final JpaUserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final OrderRestTemplate orderRestTemplate;
+    private final OrderAdapter orderAdapter;
 
     @Override
     public long createUser(CreateUserRequest request) {
@@ -51,7 +49,8 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("해당하는 유저가 없습니다."));
 
-        List<ReadOrderResponse> orderList = orderRestTemplate.getByUserId(userId);
+//        List<ReadOrderResponse> orderList = orderRestTemplate.getByUserId(userId);
+        List<ReadOrderResponse> orderList = orderAdapter.getByUserId(userId);
 
         return ReadUserDetailResponse.from(user, orderList);
     }
