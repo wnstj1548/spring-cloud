@@ -4,6 +4,7 @@ import com.example.orderservice.application.service.OrderService;
 import com.example.orderservice.presentation.dto.request.CreateOrderRequest;
 import com.example.orderservice.presentation.dto.response.ReadOrderResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,8 +18,9 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping("/{userId}/orders")
-    public ResponseEntity<Long> createOrder(@RequestBody CreateOrderRequest request, @PathVariable String userId) {
-        return ResponseEntity.ok(orderService.createOrder(request, userId));
+    public ResponseEntity<Void> createOrder(@RequestBody CreateOrderRequest request, @PathVariable String userId) {
+        orderService.createOrder(request, userId);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @GetMapping("/{userId}/orders")

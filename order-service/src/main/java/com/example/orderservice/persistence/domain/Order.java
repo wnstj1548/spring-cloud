@@ -1,5 +1,6 @@
 package com.example.orderservice.persistence.domain;
 
+import com.example.orderservice.infrastructure.dto.Payload;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -10,6 +11,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -50,5 +52,16 @@ public class Order implements Serializable {
         this.userId = userId;
         this.catalogId = catalogId;
         this.createdAt = createdAt;
+    }
+
+    public Payload toPayload() {
+        return Payload.builder()
+                .quantity(quantity)
+                .unit_price(unitPrice)
+                .user_id(userId)
+                .catalog_id(catalogId)
+                .total_price(unitPrice * quantity)
+                .created_at(LocalDateTime.now().toString())
+                .build();
     }
 }

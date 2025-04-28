@@ -40,8 +40,8 @@ public class KafkaConsumer {
             );
         }
 
-        Long id = (Long)map.get("catalogId");
-        Integer quantity = (Integer)map.get("quantity");
+        Long id = ((Integer)map.get("catalogId")).longValue();
+        Integer quantity = (Integer) map.get("quantity");
 
         Catalog catalog = catalogRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(

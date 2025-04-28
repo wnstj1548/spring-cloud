@@ -4,12 +4,12 @@ import com.example.orderservice.persistence.domain.Order;
 import lombok.Builder;
 
 @Builder
-public record OrderCreatedEvent(
+public record QuantityUpdateDTO(
         Long catalogId,
         Integer quantity
 ) {
-    public static OrderCreatedEvent from(Order order) {
-        return OrderCreatedEvent.builder()
+    public static QuantityUpdateDTO from(Order order) {
+        return QuantityUpdateDTO.builder()
                 .catalogId(order.getCatalogId())
                 .quantity(order.getQuantity())
                 .build();
