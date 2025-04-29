@@ -4,6 +4,7 @@ import com.example.orderservice.application.service.OrderService;
 import com.example.orderservice.presentation.dto.request.CreateOrderRequest;
 import com.example.orderservice.presentation.dto.response.ReadOrderResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +14,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/order-service")
+@Slf4j
 public class OrderController {
 
     private final OrderService orderService;

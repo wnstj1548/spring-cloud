@@ -11,6 +11,9 @@ import com.example.userservice.presentation.dto.response.ReadOrderResponse;
 import com.example.userservice.presentation.dto.response.ReadUserDetailResponse;
 import com.example.userservice.presentation.dto.response.ReadUserResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,12 +26,14 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class UserServiceImpl implements UserService {
 
     private final JpaUserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final OrderRestTemplate orderRestTemplate;
     private final OrderAdapter orderAdapter;
+    private final CircuitBreakerFactory circuitBreakerFactory;
 
     @Override
     public long createUser(CreateUserRequest request) {
@@ -50,7 +55,13 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new IllegalArgumentException("해당하는 유저가 없습니다."));
 
 //        List<ReadOrderResponse> orderList = orderRestTemplate.getByUserId(userId);
-        List<ReadOrderResponse> orderList = orderAdapter.getByUserId(userId);
+//        List<ReadOrderResponse> orderList = orderAdapter.getByUserId(userId);
+
+        CircuitBreaker circuitbreaker = circuitBreakerFactory.create("circuitbreaker");
+        List<ReadOrderResponse> orderList = circuitbreaker.run(
+                () -> orderAdapter.getByUserId(userId),
+                throwable -> new ArrayList<>()
+        );
 
         return ReadUserDetailResponse.from(user, orderList);
     }

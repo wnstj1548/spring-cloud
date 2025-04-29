@@ -4,6 +4,9 @@ server:
 spring:
   application:
     name: user-service
+  zipkin:
+    base-url: http://localhost:9411
+    enabled: true
   rabbitmq:
     host: 127.0.0.1
     port: 5672
@@ -43,9 +46,20 @@ management:
     web:
       exposure:
         include: refresh, health, beans, busrefresh
+  tracing:
+    sampling:
+      probability: 1.0
+    propagation:
+      consume: b3
+      produce: b3
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
 
 logging:
   level:
-    com.example.userservice.infrastructure.adapter: DEBUG
+    com.example.userservice: debug
+  pattern:
+    correlation: '%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]'
 #jwt
 #  key: ne4hrscEOHxAweirKaQrWuCmxyWDIfCgJT1plxRRvdSvh5CBZRlj7l8fzUk7CXkJc6iLQKsg88vu64Xgh5OiF6HaiBBtk2oUnTdetestestest
