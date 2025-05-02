@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,14 +22,14 @@ public class UserController {
     private final UserService userService;
     private final Environment env;
 
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<ReadUserResponse>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<ReadUserDetailResponse> getByUserId(@PathVariable String userId) {
-        return ResponseEntity.ok(userService.getUserByUserId(userId));
+    @GetMapping
+    public ResponseEntity<ReadUserDetailResponse> getByUserId(@AuthenticationPrincipal UserDetails user) {
+        return ResponseEntity.ok(userService.getUserByUserId(user.getUsername()));
     }
 
     @PostMapping

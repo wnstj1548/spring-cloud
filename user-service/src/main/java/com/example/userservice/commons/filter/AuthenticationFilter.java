@@ -40,11 +40,12 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
 
         String accessToken = tokenProvider.generateAccessToken(authResult);
+        String refreshToken = tokenProvider.generateRefreshToken(authResult, accessToken);
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        String jsonResponse = "{\"accessToken\": \"" + accessToken + "\"}";
+        String jsonResponse = "{\"accessToken\": \"" + accessToken + "\", \"refreshToken\": \"" + refreshToken + "\"}";
 
         response.getWriter().write(jsonResponse);
         response.getWriter().flush();

@@ -40,13 +40,14 @@ public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactory<Auth
             }
 
             String authorizationHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-            String token = authorizationHeader.replace("Bearer ", "");
+            String cookies = request.getHeaders().getFirst(org.springframework.http.HttpHeaders.COOKIE);
 
-            if(!isJwtValid(token)) {
-                return onError(exchange, "Token is not valid", HttpStatus.UNAUTHORIZED);
-            }
+            ServerHttpRequest modified = exchange.getRequest().mutate()
+                    .header(HttpHeaders.AUTHORIZATION, authorizationHeader)
+                    .header(org.springframework.http.HttpHeaders.COOKIE, cookies)
+                    .build();
 
-            return chain.filter(exchange);
+            return chain.filter(exchange.mutate().request(modified).build());
         });
     }
 

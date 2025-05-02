@@ -77,8 +77,8 @@ public class SecurityConfig {
                         request
                                 .anyRequest().permitAll()
                 )
-                .addFilterBefore(new AuthenticationFilter(authenticationManager(configuration), tokenProvider), UsernamePasswordAuthenticationFilter.class);
-//                .addFilterBefore(tokenAuthenticationFilter, AuthenticationFilter.class);
+                .addFilterBefore(new AuthenticationFilter(authenticationManager(configuration), tokenProvider), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(tokenAuthenticationFilter, AuthenticationFilter.class);
 
         return http.build();
     }

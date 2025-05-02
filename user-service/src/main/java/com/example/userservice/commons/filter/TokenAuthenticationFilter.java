@@ -12,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -38,10 +39,20 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String accessToken = resolveToken(request);
+        String refreshToken = resolveRefreshToken(request);
 
         if (tokenProvider.validateToken(accessToken)) {
             setAuthentication(accessToken);
+        } else if(tokenProvider.validateToken(refreshToken)) {
+            String reissueAccessToken = tokenProvider.reissueAccessToken(accessToken, refreshToken);
+
+            if(StringUtils.hasText(reissueAccessToken)){
+                setAuthentication(reissueAccessToken);
+                response.setHeader(AUTHORIZATION, TOKEN_PREFIX + reissueAccessToken);
+            }
         }
+
+        filterChain.doFilter(request, response);
 
         filterChain.doFilter(request, response);
     }

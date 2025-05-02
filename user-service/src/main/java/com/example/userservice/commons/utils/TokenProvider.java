@@ -1,8 +1,10 @@
 package com.example.userservice.commons.utils;
 
+import com.example.userservice.application.service.TokenService;
 import com.example.userservice.commons.exception.ApplicationException;
 import com.example.userservice.commons.exception.TokenException;
 import com.example.userservice.commons.exception.payload.ErrorStatus;
+import com.example.userservice.persistence.domain.Token;
 import com.example.userservice.persistence.repository.JpaUserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -31,18 +33,26 @@ public class TokenProvider {
 
     private final SecretKey secretKey;
     private final JpaUserRepository userRepository;
+    private final TokenService tokenService;
 
     private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 30L;
+    private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 60L * 24;
     private static final String KEY_ROLE = "ROLE_USER";
 
     @Autowired
-    public TokenProvider(@Value("${jwt.key}") String key, JpaUserRepository userRepository) {
+    public TokenProvider(@Value("${jwt.key}") String key, JpaUserRepository userRepository, TokenService tokenService) {
         this.secretKey = Keys.hmacShaKeyFor(key.getBytes());
         this.userRepository = userRepository;
+        this.tokenService = tokenService;
     }
 
     public String generateAccessToken(Authentication authentication) {
         return generateToken(authentication, ACCESS_TOKEN_EXPIRE_TIME);
+    }
+
+    public String generateRefreshToken(Authentication authentication, String accessToken) {
+        String refreshToken = generateToken(authentication, REFRESH_TOKEN_EXPIRE_TIME);
+        return tokenService.saveOrUpdate(authentication.getName(), refreshToken, accessToken);
     }
 
     private String generateToken(Authentication authentication, long expireTime) {
@@ -65,6 +75,20 @@ public class TokenProvider {
                 .expiration(expiredDate)
                 .signWith(secretKey, Jwts.SIG.HS512)
                 .compact();
+    }
+
+    public String reissueAccessToken(String accessToken, String refreshToken) {
+        if (StringUtils.hasText(accessToken)) {
+            Token token = tokenService.findByAccessTokenOrThrow(accessToken);
+
+            if(refreshToken.equals(token.getRefreshToken()) && validateToken(refreshToken)) {
+                String reissueAccessToken = generateAccessToken(getAuthentication(refreshToken));
+                tokenService.updateToken(reissueAccessToken ,token);
+
+                return reissueAccessToken;
+            }
+        }
+        return null;
     }
 
     public Authentication getAuthentication(String token) {
